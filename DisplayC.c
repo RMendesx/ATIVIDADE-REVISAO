@@ -9,6 +9,7 @@
 #include "hardware/adc.h"
 #include "hardware/i2c.h"
 #include "hardware/timer.h"
+#include "hardware/pwm.h"
 #include "matriz_led.pio.h"
 
 #define I2C_PORT i2c1
@@ -38,6 +39,34 @@ char c = '0';              // Variável para armazenar o número a ser exibido";
 
 
 
+// Inicializa um buzzer com frequência em Hz
+void buzzer_on(uint gpio, uint freq_hz) {
+  gpio_set_function(gpio, GPIO_FUNC_PWM);
+  uint slice = pwm_gpio_to_slice_num(gpio);
+
+  uint32_t clock = 125000000; // Clock da PWM da Pico
+  uint32_t wrap = clock / freq_hz;
+
+  pwm_set_wrap(slice, wrap);
+  pwm_set_chan_level(slice, PWM_CHAN_A, wrap / 2); // 50% duty
+  pwm_set_enabled(slice, true);
+}
+
+void buzzer_off(uint gpio) {
+  uint slice = pwm_gpio_to_slice_num(gpio);
+  pwm_set_enabled(slice, false);
+  gpio_set_function(gpio, GPIO_FUNC_SIO);
+  gpio_set_dir(gpio, GPIO_OUT);
+  gpio_put(gpio, 0);
+}
+
+// Desliga o buzzer (desativa PWM e limpa o pino)
+int64_t desligar_buzzer_callback(alarm_id_t id, void *user_data) {
+  uint gpio_buzzer = (uint)(uintptr_t)user_data;
+  buzzer_off(gpio_buzzer);
+  return 0;
+}
+
 volatile uint32_t last_interrupt_time = 0;
 
 int64_t apagar_led_callback(alarm_id_t id, void *user_data)
@@ -60,8 +89,19 @@ void gpio_callback(uint gpio, uint32_t events)
   last_interrupt_time = current_time;
   last_gpio = gpio;
 
+
+
+
+
+
   if (gpio == BOTAO_A)
   {
+    buzzer_on(BUZZER_A, 2000);
+    buzzer_on(BUZZER_B, 2000);
+
+    add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_A, false);
+    add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_B, false);
+
     c = c - 1; // Decrementa o valor de c a cada pressionamento do botão A
     if (c < '0')
       c = '9'; // Se c for menor que 0, volta para 9
@@ -81,15 +121,20 @@ void gpio_callback(uint gpio, uint32_t events)
 
   else if (gpio == BOTAO_B)
   {
+    buzzer_on(BUZZER_A, 2000);
+    buzzer_on(BUZZER_B, 2000);
+
+    add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_A, false);
+    add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_B, false);
+    
     c = c + 1; // Incrementa o valor de c a cada pressionamento do botão B
     if (c > '9')
       c = '0'; // Se c for maior que 9, volta para 0
-    
+
     if (gpio_get(LED_AZUL) == 0)
     {
       gpio_put(LED_AZUL, 1);
       printf("Led azul ligado\n");
-  
       add_alarm_in_ms(1000, apagar_led_callback, (void *)(uintptr_t)LED_AZUL, false);
       printf("Led azul desligado\n");
     }
@@ -100,6 +145,12 @@ void gpio_callback(uint gpio, uint32_t events)
 
   else if (gpio == JOYSTICK_PB)
   {
+    buzzer_on(BUZZER_A, 2000);
+    buzzer_on(BUZZER_B, 2000);
+
+    add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_A, false);
+    add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_B, false);
+    
     c = '0';
 
     if (gpio_get(LED_VERMELHO) == 0)
