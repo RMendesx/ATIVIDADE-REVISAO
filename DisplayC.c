@@ -15,6 +15,7 @@
 #include "hardware/pwm.h"
 #include "matriz_led.pio.h"
 
+
 /* ------------------------------------------------------------------------------------------------------------------------ */
 /* DEFINIÇÕES DE PINOS E VARIÁVEIS GLOBAIS */
 /* ------------------------------------------------------------------------------------------------------------------------ */
@@ -124,8 +125,8 @@ void gpio_callback(uint gpio, uint32_t events) // Função de callback para inte
   }
   else if (gpio == BOTAO_B) // Se o botão B for pressionado
   {
-    buzzer_on(BUZZER_A, 2000); // Liga o buzzer A
-    buzzer_on(BUZZER_B, 2000); // Liga o buzzer B
+    buzzer_on(BUZZER_A, 3200); // Liga o buzzer A
+    buzzer_on(BUZZER_B, 3200); // Liga o buzzer B
 
     add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_A, false); // Adiciona alarme para desligar o buzzer A após 100ms
     add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_B, false); // Adiciona alarme para desligar o buzzer B após 100ms
@@ -133,7 +134,7 @@ void gpio_callback(uint gpio, uint32_t events) // Função de callback para inte
     c = c + 1; // Incrementa o valor de c a cada pressionamento do botão B
     if (c > '9') // Se c for maior que 9, volta para 0
       c = '0';
-
+    
     if (gpio_get(LED_AZUL) == 0)     // Verifique o estado atual do LED
     {
       gpio_put(LED_AZUL, 1);          // Acende o LED se ele estiver apagado
@@ -146,11 +147,11 @@ void gpio_callback(uint gpio, uint32_t events) // Função de callback para inte
   }
   else if (gpio == JOYSTICK_PB)
   {
-    buzzer_on(BUZZER_A, 2000); // Liga o buzzer A
-    buzzer_on(BUZZER_B, 2000); // Liga o buzzer B
+    buzzer_on(BUZZER_A, 4000); // Liga o buzzer A
+    buzzer_on(BUZZER_B, 4000); // Liga o buzzer B
 
-    add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_A, false); // Adiciona alarme para desligar o buzzer A após 100ms
-    add_alarm_in_ms(100, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_B, false); // Adiciona alarme para desligar o buzzer B após 100ms
+    add_alarm_in_ms(200, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_A, false); // Adiciona alarme para desligar o buzzer A após 100ms
+    add_alarm_in_ms(200, desligar_buzzer_callback, (void *)(uintptr_t)BUZZER_B, false); // Adiciona alarme para desligar o buzzer B após 100ms
 
     c = '0'; // Reinicia o valor de c para 0
 
@@ -334,7 +335,6 @@ int main()
   uint16_t adc_value_x; // Variável para armazenar o valor do eixo X
   uint16_t adc_value_y; // Variável para armazenar o valor do eixo Y
 
-  
   /* LOOP INFINITO DO PROGRAMA */
   while (true)
   {
